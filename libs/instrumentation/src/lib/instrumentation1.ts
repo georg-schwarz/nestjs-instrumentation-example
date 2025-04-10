@@ -8,6 +8,7 @@ import { Resource } from '@opentelemetry/resources';
 import { ConsoleSpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
+import { createLogger, format, transports } from 'winston';
 
 interface TracingConfig {
   serviceName: string;
@@ -31,12 +32,24 @@ export function startTracingSDK(config: TracingConfig) {
   });
   const logExporter = new ConsoleSpanExporter();
 
-  const logger = {
-    verbose: (msg: string) => {
-      console.debug(msg);
-    },
-    ...console
-  }
+  const logger = createLogger({
+    level: 'debug',
+    format: format.combine(format.timestamp(), format.colorize(), format.printf((input) => {
+      const { timestamp, context, level, message, stack } = input;
+    
+      let formattedMessage = `${timestamp} [${context}] ${level}: ${message}`;
+      if (stack != null) {
+        formattedMessage += ` - ${stack.toString()}`;
+      }
+      return formattedMessage;
+    })),
+    transports: [
+      new transports.Console({
+        handleExceptions: true,
+        handleRejections: true,
+      })
+    ]
+  })
   diag.setLogger(logger, DiagLogLevel.ERROR);
 
   const provider = new NodeTracerProvider({

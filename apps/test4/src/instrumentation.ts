@@ -8,18 +8,31 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import opentelemetry from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { diag, DiagLogLevel } from '@opentelemetry/api';
+import { createLogger, format, transports } from 'winston';
 
 const logExporter = new ConsoleSpanExporter();
 const exporter = new OTLPTraceExporter({
   url: process.env['OTEL_RECEIVER_ENDPOINT'],
 });
 
-const logger = {
-  verbose: (msg: string) => {
-    console.debug(msg);
-  },
-  ...console,
-};
+const logger = createLogger({
+  level: 'debug',
+  format: format.combine(format.timestamp(), format.colorize(), format.printf((input) => {
+    const { timestamp, context, level, message, stack } = input;
+  
+    let formattedMessage = `${timestamp} [${context}] ${level}: ${message}`;
+    if (stack != null) {
+      formattedMessage += ` - ${stack.toString()}`;
+    }
+    return formattedMessage;
+  })),
+  transports: [
+    new transports.Console({
+      handleExceptions: true,
+      handleRejections: true,
+    })
+  ]
+})
 diag.setLogger(logger, DiagLogLevel.DEBUG);
 
 const provider = new BasicTracerProvider();
