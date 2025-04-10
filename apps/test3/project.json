@@ -1,0 +1,30 @@
+{
+  "name": "test3",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/test3/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": [
+        "build"
+      ],
+      "options": {
+        "buildTarget": "test3:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "test3:build:development"
+        },
+        "production": {
+          "buildTarget": "test3:build:production"
+        }
+      }
+    }
+  },
+  "tags": []
+}

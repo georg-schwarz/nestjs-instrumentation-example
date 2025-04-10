@@ -113,3 +113,84 @@ bootstrap();
 
 The execution of `init_src` is deferred after the imports of the nestjs library.
 
+
+## Test3 ()
+
+We instructed esbuild to load the instrumentation file first and moved the instrumentation into the app (instead of the library).
+```js
+const esbuildPluginTsc = require('esbuild-plugin-tsc');
+const path = require('node:path');
+
+/** @type {import('esbuild').BuildOptions}  */
+module.exports = {
+  keepNames: true,
+  plugins: [
+    esbuildPluginTsc({
+      tsconfigPath: path.join(__dirname, 'tsconfig.app.json'),
+    }),
+  ],
+  // Load instrumentation first!
+  inject: [path.join(__dirname, 'src', 'instrumentation.ts')],
+};
+```
+
+This time, the instrumentation happens before loading the nestjs modules in the bundled file:
+
+```js
+
+// ...
+
+// apps/test3/src/instrumentation.ts
+var instrumentation_exports = {};
+import {
+  BasicTracerProvider,
+  ConsoleSpanExporter,
+  SimpleSpanProcessor
+} from "@opentelemetry/sdk-trace-base";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import opentelemetry from "@opentelemetry/sdk-node";
+import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
+import { diag, DiagLogLevel } from "@opentelemetry/api";
+var logExporter, exporter, logger, provider, sdk;
+var init_instrumentation = __esm({
+  "apps/test3/src/instrumentation.ts"() {
+    "use strict";
+    logExporter = new ConsoleSpanExporter();
+    exporter = new OTLPTraceExporter({
+      url: process.env["OTEL_RECEIVER_ENDPOINT"]
+    });
+    logger = {
+      verbose: (msg) => {
+        console.debug(msg);
+      },
+      ...console
+    };
+    diag.setLogger(logger, DiagLogLevel.DEBUG);
+    provider = new BasicTracerProvider();
+    provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
+    provider.addSpanProcessor(new SimpleSpanProcessor(logExporter));
+    provider.register();
+    sdk = new opentelemetry.NodeSDK({
+      traceExporter: exporter,
+      instrumentations: [getNodeAutoInstrumentations()]
+    });
+    sdk.start();
+    process.on("SIGTERM", () => {
+      sdk.shutdown().then(() => console.log("Tracing terminated")).catch((error) => console.log("Error terminating tracing", error)).finally(() => process.exit(0));
+    });
+  }
+});
+
+// apps/test3/src/main.ts
+init_instrumentation();
+import { Logger, ValidationPipe } from "@nestjs/common";
+import { NestFactory } from "@nestjs/core";
+
+// ...
+
+```
+
+But somehow the error message remains:
+```
+@opentelemetry/instrumentation-nestjs-core Module @nestjs/core has been loaded before @opentelemetry/instrumentation-nestjs-core so it might not work, please initialize it before requiring @nestjs/core
+```
