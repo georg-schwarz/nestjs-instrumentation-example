@@ -1,0 +1,34 @@
+{
+  "name": "test4",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/test4/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "options": {
+        "additionalEntryPoints": [ "apps/test4/src/instrumentation.ts" ]
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": [
+        "build"
+      ],
+      "options": {
+        "buildTarget": "test4:build",
+        "runBuildTargetDependencies": false,
+        "runtimeArgs": ["--require", "./dist/apps/test4/instrumentation.js"]
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "test4:build:development"
+        },
+        "production": {
+          "buildTarget": "test4:build:production"
+        }
+      }
+    }
+  },
+  "tags": []
+}

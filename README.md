@@ -114,7 +114,7 @@ bootstrap();
 The execution of `init_src` is deferred after the imports of the nestjs library.
 
 
-## Test3 ()
+## Test3 (esbuild inject)
 
 We instructed esbuild to load the instrumentation file first and moved the instrumentation into the app (instead of the library).
 ```js
@@ -194,3 +194,27 @@ But somehow the error message remains:
 ```
 @opentelemetry/instrumentation-nestjs-core Module @nestjs/core has been loaded before @opentelemetry/instrumentation-nestjs-core so it might not work, please initialize it before requiring @nestjs/core
 ```
+
+
+## Test4 (node --require <path-to-instrumentation>)
+
+In test4, we forced preloading the instrumentation files by using the `--require` flag of node.
+Therefore, we instructed the `node` process with these parameters in the `project.json` file:
+```json
+// ....
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": [
+        "build"
+      ],
+      "options": {
+        "buildTarget": "test4:build",
+        "runBuildTargetDependencies": false,
+        "runtimeArgs": ["--require", "./dist/apps/test4/instrumentation.js"] // << use --require
+      },
+// ...
+```
+
+The result is a working instrumentation, we can also see nestjs specific traces being logged.
+Last open point is now moving the instrumentation logic back to a library to share among apps.
