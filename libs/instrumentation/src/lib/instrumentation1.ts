@@ -8,7 +8,6 @@ import { Resource } from '@opentelemetry/resources';
 import { ConsoleSpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
-import { mergeScan } from 'rxjs';
 
 interface TracingConfig {
   serviceName: string;

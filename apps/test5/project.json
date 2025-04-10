@@ -1,0 +1,34 @@
+{
+  "name": "test5",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/test5/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "options": {
+        "additionalEntryPoints": [ "apps/test5/src/instrumentation.ts" ]
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": [
+        "build"
+      ],
+      "options": {
+        "buildTarget": "test5:build",
+        "runBuildTargetDependencies": false,
+        "runtimeArgs": ["--require", "./dist/apps/test5/instrumentation.js"]
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "test5:build:development"
+        },
+        "production": {
+          "buildTarget": "test5:build:production"
+        }
+      }
+    }
+  },
+  "tags": []
+}

@@ -218,3 +218,24 @@ Therefore, we instructed the `node` process with these parameters in the `projec
 
 The result is a working instrumentation, we can also see nestjs specific traces being logged.
 Last open point is now moving the instrumentation logic back to a library to share among apps.
+
+
+## Test5 (final version)
+
+In test5, we used the learnings from test4 to use the library in the `instrumentation.js`.
+This allows each app to configure the tracing individually while still sharing code:
+```js
+import { instrumentation1 } from 'instrumentation';
+
+instrumentation1.startTracingSDK({
+  serviceName: 'test1',
+  otelReceiverEndpoint: process.env.OTEL_RECEIVER_ENDPOINT,
+});
+```
+
+---
+
+That's it!
+We debugged the whole issue step by step using minimal examples.
+I hope you can profit from my learnings as well.
+If yes, I appreciate your **star on the repo**!
