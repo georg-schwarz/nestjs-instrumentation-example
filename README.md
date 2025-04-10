@@ -6,26 +6,30 @@ We had issues correctly setting up open telemetry instrumentation in the followi
 - [esbuild](https://esbuild.github.io/) for bundling out apps (bundles libraries into apps).
 - [nestjs](https://nestjs.com/) as the framework.
 - [js auto-instrumentation](https://github.com/open-telemetry/opentelemetry-js-contrib) to create tracing data.
+Further, we wanted to share the (configurable) tracing boilerplate setup code among apps in the monorepo.
 
 **We only received some traces, but not all auto-instrumented ones**.
 Thus, we debug the issue in this repo with a minimal example.
-If you are looking for a fix, please use the last test below.
+If you are looking for a **fix**, please use the **last version below**.
 
 ## Run
+
+Libraries are in the `libs` folder, test apps in `apps` folder.
 
 1. Start the otel receiver
 ```bash
 docker compose up
 ```
 
-2. Start a test app
+2. Start a test app (1-5)
 ```bash
 npx nx serve test1
 ```
 
-3. Generate traces for a request by going to [localhost:3000](localhost:3000).
+3. Generate traces and logging them by going to [localhost:3000](localhost:3000).
 
-## Findings
+
+## Findings (iterative tests)
 
 ### Test1 (our current implementation)
 
@@ -206,6 +210,11 @@ In test4, we forced preloading the instrumentation files by using the `--require
 Therefore, we instructed the `node` process with these parameters in the `project.json` file:
 ```json
 // ....
+    "build": {
+      "options": {
+        "additionalEntryPoints": [ "apps/test5/src/instrumentation.ts" ] // << bundle as second artifact
+      }
+    },
     "serve": {
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
@@ -226,7 +235,7 @@ Last open point is now moving the instrumentation logic back to a library to sha
 
 ### Test5 (final solution)
 
-In test5, we used the learnings from test4 to use the library in the `instrumentation.js`.
+In test5, we used the **learnings from test4** to use the library in the `instrumentation.js`.
 This allows each app to configure the tracing individually while still sharing code:
 ```js
 import { instrumentation1 } from 'instrumentation';
