@@ -2,7 +2,14 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 
+import { startTracingSDK } from 'instrumentation';
+
 async function bootstrap() {
+  startTracingSDK({
+    serviceName: 'test1',
+    otelReceiverEndpoint: process.env.OTEL_RECEIVER_ENDPOINT,
+  })
+
   const app = await NestFactory.create(AppModule);
   
   app.enableCors();
