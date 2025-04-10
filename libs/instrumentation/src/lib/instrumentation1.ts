@@ -5,7 +5,7 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 
 import { Resource } from '@opentelemetry/resources';
-import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { ConsoleSpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 import { mergeScan } from 'rxjs';
@@ -30,6 +30,7 @@ export function startTracingSDK(config: TracingConfig) {
     url: config.otelReceiverEndpoint,
     credentials: credentials.createInsecure(),
   });
+  const logExporter = new ConsoleSpanExporter();
 
   const logger = {
     verbose: (msg: string) => {
@@ -43,7 +44,7 @@ export function startTracingSDK(config: TracingConfig) {
     resource: new Resource({
       [ATTR_SERVICE_NAME]: config.serviceName,
     }),
-    spanProcessors: [new SimpleSpanProcessor(exporter)],
+    spanProcessors: [new SimpleSpanProcessor(exporter), new SimpleSpanProcessor(logExporter)],
   });
   provider.register();
 

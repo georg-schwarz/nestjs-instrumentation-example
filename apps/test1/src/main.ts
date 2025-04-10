@@ -2,10 +2,10 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 
-import { startTracingSDK } from 'instrumentation';
+import { instrumentation1 } from 'instrumentation';
 
 async function bootstrap() {
-  startTracingSDK({
+  instrumentation1.startTracingSDK({
     serviceName: 'test1',
     otelReceiverEndpoint: process.env.OTEL_RECEIVER_ENDPOINT,
   })
