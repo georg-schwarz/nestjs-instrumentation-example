@@ -7,6 +7,10 @@ We had issues correctly setting up open telemetry instrumentation in the followi
 - [nestjs](https://nestjs.com/) as the framework.
 - [js auto-instrumentation](https://github.com/open-telemetry/opentelemetry-js-contrib) to create tracing data.
 
+**We only received some traces, but not all auto-instrumented ones**.
+Thus, we debug the issue in this repo with a minimal example.
+If you are looking for a fix, please use the last test below.
+
 ## Run
 
 1. Start the otel receiver
@@ -114,7 +118,7 @@ bootstrap();
 The execution of `init_src` is deferred after the imports of the nestjs library.
 
 
-## Test3 (esbuild inject)
+### Test3 (esbuild inject)
 
 We instructed esbuild to load the instrumentation file first and moved the instrumentation into the app (instead of the library).
 ```js
@@ -196,7 +200,7 @@ But somehow the error message remains:
 ```
 
 
-## Test4 (node --require <path-to-instrumentation>)
+### Test4 (node --require <path-to-instrumentation>)
 
 In test4, we forced preloading the instrumentation files by using the `--require` flag of node.
 Therefore, we instructed the `node` process with these parameters in the `project.json` file:
@@ -220,7 +224,7 @@ The result is a working instrumentation, we can also see nestjs specific traces 
 Last open point is now moving the instrumentation logic back to a library to share among apps.
 
 
-## Test5 (final version)
+### Test5 (final solution)
 
 In test5, we used the learnings from test4 to use the library in the `instrumentation.js`.
 This allows each app to configure the tracing individually while still sharing code:
@@ -233,9 +237,9 @@ instrumentation1.startTracingSDK({
 });
 ```
 
----
+## Closing
 
-That's it!
+That's it! :tada:
 We debugged the whole issue step by step using minimal examples.
 I hope you can profit from my learnings as well.
-If yes, I appreciate your **star on the repo**!
+If yes, I appreciate your **star :star: on the repo**!
