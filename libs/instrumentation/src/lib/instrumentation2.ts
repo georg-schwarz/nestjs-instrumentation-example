@@ -1,5 +1,4 @@
 import {
-  BasicTracerProvider,
   ConsoleSpanExporter,
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
@@ -17,32 +16,35 @@ const exporter = new OTLPTraceExporter({
 
 const logger = createLogger({
   level: 'debug',
-  format: format.combine(format.timestamp(), format.colorize(), format.printf((input) => {
-    const { timestamp, context, level, message, stack } = input;
-  
-    let formattedMessage = `${timestamp} [${context}] ${level}: ${message}`;
-    if (stack != null) {
-      formattedMessage += ` - ${stack.toString()}`;
-    }
-    return formattedMessage;
-  })),
+  format: format.combine(
+    format.timestamp(),
+    format.colorize(),
+    format.printf((input) => {
+      const { timestamp, context, level, message, stack } = input;
+
+      let formattedMessage = `${timestamp} [${context}] ${level}: ${message}`;
+      if (stack != null) {
+        formattedMessage += ` - ${stack.toString()}`;
+      }
+      return formattedMessage;
+    })
+  ),
   transports: [
     new transports.Console({
       handleExceptions: true,
       handleRejections: true,
-    })
-  ]
-})
+    }),
+  ],
+});
 diag.setLogger(logger, DiagLogLevel.DEBUG);
-
-const provider = new BasicTracerProvider();
-provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
-provider.addSpanProcessor(new SimpleSpanProcessor(logExporter));
-provider.register();
 
 const sdk = new opentelemetry.NodeSDK({
   traceExporter: exporter,
   instrumentations: [getNodeAutoInstrumentations()],
+  spanProcessors: [
+    new SimpleSpanProcessor(exporter),
+    new SimpleSpanProcessor(logExporter),
+  ],
 });
 
 sdk.start();

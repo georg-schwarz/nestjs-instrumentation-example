@@ -35,14 +35,13 @@ const logger = createLogger({
 })
 diag.setLogger(logger, DiagLogLevel.DEBUG);
 
-const provider = new BasicTracerProvider();
-provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
-provider.addSpanProcessor(new SimpleSpanProcessor(logExporter));
-provider.register();
-
 const sdk = new opentelemetry.NodeSDK({
   traceExporter: exporter,
   instrumentations: [getNodeAutoInstrumentations()],
+  spanProcessors: [
+    new SimpleSpanProcessor(exporter),
+    new SimpleSpanProcessor(logExporter),
+  ],
 });
 
 sdk.start();

@@ -58,10 +58,10 @@ export function startTracingSDK(config: TracingConfig) {
     }),
     spanProcessors: [new SimpleSpanProcessor(exporter), new SimpleSpanProcessor(logExporter)],
   });
-  provider.register();
 
   registerInstrumentations({
     instrumentations: [getNodeAutoInstrumentations()],
+    tracerProvider: provider,
   });
   console.info('Finished instrumenting OpenTelemetry');
 }
