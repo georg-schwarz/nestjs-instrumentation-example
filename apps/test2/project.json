@@ -1,0 +1,30 @@
+{
+  "name": "test2",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/test2/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": [
+        "build"
+      ],
+      "options": {
+        "buildTarget": "test2:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "test2:build:development"
+        },
+        "production": {
+          "buildTarget": "test2:build:production"
+        }
+      }
+    }
+  },
+  "tags": []
+}

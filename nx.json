@@ -4,18 +4,9 @@
     "build": {
       "cache": true,
       "executor": "@nx/esbuild:esbuild",
-      "dependsOn": [
-        "^generate-code",
-        "^build",
-        "pre-build"
-      ],
-      "inputs": [
-        "production",
-        "^production"
-      ],
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "dependsOn": ["^generate-code", "^build", "pre-build"],
+      "inputs": ["production", "^production"],
+      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
         "main": "{projectRoot}/src/main.ts",
@@ -39,26 +30,19 @@
     },
     "@nx/webpack:webpack": {
       "cache": true,
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "production",
-        "^production"
-      ]
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
+    },
+    "@nx/esbuild:esbuild": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     }
   },
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
-    "production": [
-      "default"
-    ],
-    "sharedGlobals": [
-      "{workspaceRoot}/babel.config.json"
-    ]
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": ["default"],
+    "sharedGlobals": ["{workspaceRoot}/babel.config.json"]
   },
   "useInferencePlugins": false,
   "defaultBase": "origin/main"
