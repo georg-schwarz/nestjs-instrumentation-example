@@ -1,0 +1,65 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "targetDefaults": {
+    "build": {
+      "cache": true,
+      "executor": "@nx/esbuild:esbuild",
+      "dependsOn": [
+        "^generate-code",
+        "^build",
+        "pre-build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "defaultConfiguration": "production",
+      "options": {
+        "main": "{projectRoot}/src/main.ts",
+        "outputPath": "dist/{projectRoot}",
+        "tsConfig": "{projectRoot}/tsconfig.app.json",
+        "declaration": true,
+        "sourceMap": true,
+        "generatePackageJson": true,
+        "esbuildConfig": "{projectRoot}/esbuild.config.cjs"
+      },
+      "configurations": {
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "{projectRoot}/src/environments/environment.ts",
+              "with": "{projectRoot}/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "@nx/webpack:webpack": {
+      "cache": true,
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ]
+    }
+  },
+  "namedInputs": {
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals"
+    ],
+    "production": [
+      "default"
+    ],
+    "sharedGlobals": [
+      "{workspaceRoot}/babel.config.json"
+    ]
+  },
+  "useInferencePlugins": false,
+  "defaultBase": "origin/main"
+}
